@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Circuit Playground ✨ RC &amp; LC circuits, explained cutely</title>
+  <meta name="description" content="A cozy, whimsical guide to RC and LC circuits with interactive graphs showing the voltage at every point.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Reusable cute characters (drawn once, used many times with <use>) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- Rita the Resistor -->
+      <symbol id="rita" viewBox="0 0 120 130">
+        <path class="wire" d="M4 69H24M96 69H116"/>
+        <ellipse cx="44" cy="106" rx="11" ry="7" fill="#ff8cc6" stroke="#3d1a47" stroke-width="4"/>
+        <ellipse cx="76" cy="106" rx="11" ry="7" fill="#ff8cc6" stroke="#3d1a47" stroke-width="4"/>
+        <rect x="22" y="38" width="76" height="62" rx="28" fill="#fff1a8" stroke="#3d1a47" stroke-width="4"/>
+        <path d="M33 52V92" stroke="#ff2d95" stroke-width="6" stroke-linecap="round"/>
+        <path d="M42 50V90" stroke="#a66bff" stroke-width="6" stroke-linecap="round"/>
+        <path d="M89 54V90" stroke="#19c9a0" stroke-width="6" stroke-linecap="round"/>
+        <path d="M24 74Q12 80 10 90" class="wire thin"/>
+        <ellipse class="eye" cx="54" cy="66" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <ellipse class="eye" cx="70" cy="66" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <path d="M54 77Q62 86 70 77" fill="none" stroke="#3d1a47" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="48" cy="76" r="4" fill="#ff8cc6" opacity=".8"/>
+        <circle cx="76" cy="76" r="4" fill="#ff8cc6" opacity=".8"/>
+        <g class="arm-wave">
+          <path d="M96 66Q112 56 112 42" class="wire thin"/>
+          <circle cx="112" cy="38" r="5.5" fill="#fff1a8" stroke="#3d1a47" stroke-width="3"/>
+        </g>
+      </symbol>
+
+      <!-- Cappy the Capacitor -->
+      <symbol id="cappy" viewBox="0 0 120 130">
+        <path class="wire" d="M60 4V28M60 102V126"/>
+        <rect x="26" y="36" width="68" height="58" rx="8" fill="#aaf0d1" stroke="#3d1a47" stroke-width="4"/>
+        <rect x="16" y="26" width="88" height="12" rx="6" fill="#ff2d95" stroke="#3d1a47" stroke-width="4"/>
+        <rect x="16" y="92" width="88" height="12" rx="6" fill="#ff2d95" stroke="#3d1a47" stroke-width="4"/>
+        <path d="M26 72Q12 76 10 88" class="wire thin"/>
+        <ellipse class="eye" cx="49" cy="60" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <ellipse class="eye" cx="71" cy="60" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <path d="M51 72Q60 82 69 72" fill="none" stroke="#3d1a47" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="42" cy="71" r="4" fill="#ff8cc6" opacity=".8"/>
+        <circle cx="78" cy="71" r="4" fill="#ff8cc6" opacity=".8"/>
+        <g class="arm-wave">
+          <path d="M94 64Q110 54 110 40" class="wire thin"/>
+          <circle cx="110" cy="36" r="5.5" fill="#aaf0d1" stroke="#3d1a47" stroke-width="3"/>
+        </g>
+      </symbol>
+
+      <!-- Indy the Inductor -->
+      <symbol id="indy" viewBox="0 0 120 130">
+        <path class="wire" d="M4 74H24M96 74H116"/>
+        <ellipse cx="46" cy="110" rx="11" ry="7" fill="#ff8cc6" stroke="#3d1a47" stroke-width="4"/>
+        <ellipse cx="74" cy="110" rx="11" ry="7" fill="#ff8cc6" stroke="#3d1a47" stroke-width="4"/>
+        <rect x="24" y="44" width="72" height="62" rx="28" fill="#d6b8ff" stroke="#3d1a47" stroke-width="4"/>
+        <path d="M28 44q8 -30 17 0q8 -30 17 0q8 -30 17 0q8 -30 17 0" fill="none" stroke="#7b3fe4" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M24 80Q12 86 10 96" class="wire thin"/>
+        <ellipse class="eye" cx="50" cy="71" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <ellipse class="eye" cx="70" cy="71" rx="3.5" ry="4.5" fill="#3d1a47"/>
+        <path d="M52 83Q60 92 68 83" fill="none" stroke="#3d1a47" stroke-width="3.5" stroke-linecap="round"/>
+        <circle cx="43" cy="82" r="4" fill="#ff8cc6" opacity=".8"/>
+        <circle cx="77" cy="82" r="4" fill="#ff8cc6" opacity=".8"/>
+        <g class="arm-wave">
+          <path d="M96 72Q112 62 112 48" class="wire thin"/>
+          <circle cx="112" cy="44" r="5.5" fill="#d6b8ff" stroke="#3d1a47" stroke-width="3"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Drifting background decorations (pure CSS animation) -->
+  <div class="sky" aria-hidden="true">
+    <span class="fx cloud" style="--top:8%;--dur:90s;--delay:-20s;--scale:1"></span>
+    <span class="fx cloud" style="--top:38%;--dur:120s;--delay:-70s;--scale:1.4"></span>
+    <span class="fx cloud" style="--top:70%;--dur:105s;--delay:-40s;--scale:.8"></span>
+    <span class="fx spark" style="--left:6%;--dur:26s;--delay:-3s;--size:1.6rem">✨</span>
+    <span class="fx spark" style="--left:22%;--dur:34s;--delay:-18s;--size:1.2rem">✨</span>
+    <span class="fx spark" style="--left:47%;--dur:30s;--delay:-9s;--size:1.8rem">✨</span>
+    <span class="fx spark" style="--left:71%;--dur:38s;--delay:-25s;--size:1.3rem">✨</span>
+    <span class="fx spark" style="--left:90%;--dur:28s;--delay:-14s;--size:1.5rem">✨</span>
+    <span class="fx star" style="--left:12%;--dur:40s;--delay:-30s;--size:1.4rem">★</span>
+    <span class="fx star" style="--left:35%;--dur:32s;--delay:-6s;--size:1.1rem">★</span>
+    <span class="fx star" style="--left:62%;--dur:44s;--delay:-22s;--size:1.7rem">★</span>
+    <span class="fx star" style="--left:83%;--dur:36s;--delay:-12s;--size:1.2rem">★</span>
+    <span class="fx heart" style="--left:3%;--dur:42s;--delay:-16s;--size:1.5rem">♥</span>
+    <span class="fx heart" style="--left:28%;--dur:36s;--delay:-28s;--size:1.2rem">♥</span>
+    <span class="fx heart" style="--left:55%;--dur:46s;--delay:-2s;--size:1.8rem">♥</span>
+    <span class="fx heart" style="--left:77%;--dur:39s;--delay:-34s;--size:1.3rem">♥</span>
+    <span class="fx heart" style="--left:95%;--dur:33s;--delay:-20s;--size:1.1rem">♥</span>
+  </div>
+
+  <!-- Floating pill navigation -->
+  <div class="nav-wrap">
+    <nav class="pill" aria-label="Main navigation">
+      <a href="#top">🏠 Home</a>
+      <a href="#voltage">💧 Voltage 101</a>
+      <a href="#rc">🔋 RC</a>
+      <a href="#lc">🎢 LC</a>
+      <a href="#cheat">📋 Cheat sheet</a>
+      <a href="#quiz">🎉 Quiz</a>
+    </nav>
+  </div>
+
+  <main>
+    <!-- 1. HERO -->
+    <header id="top" class="hero section">
+      <p class="kicker">✨ a cozy storybook for grown-up nerds ✨</p>
+      <h1>Circuit <span>Playground</span></h1>
+      <p class="pitch">Why do circuits take their sweet time? 🐌⚡</p>
+
+      <div class="cast">
+        <div class="cast-member">
+          <div class="bubble">Hi, I'm Rita! 👋</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Rita the Resistor, waving"><use href="#rita"/></svg>
+        </div>
+        <div class="cast-member">
+          <div class="bubble">Cappy here! 💖</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Cappy the Capacitor, waving"><use href="#cappy"/></svg>
+        </div>
+        <div class="cast-member">
+          <div class="bubble">Indy says hello! 🌀</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Indy the Inductor, waving"><use href="#indy"/></svg>
+        </div>
+      </div>
+
+      <a class="btn big" href="#rc">Let's play! ⚡</a>
+      <p class="tiny">(Psst... the first demo is a battery, a resistor and a capacitor.)</p>
+    </header>
+
+    <div class="wave" role="presentation"></div>
+
+    <!-- 2. VOLTAGE 101 -->
+    <section id="voltage" class="section">
+      <h2><span class="emoji">💧</span> Voltage 101</h2>
+      <p class="lead">Voltage is <strong>electrical pressure</strong>. It's the push that wants to shove electrons around. More pressure, more push. 💪</p>
+
+      <div class="card pipe-card">
+        <svg class="pipe-svg" viewBox="0 0 520 210" role="img" aria-label="Two water tanks joined by a pipe. The left tank is full (high pressure) and the right tank is nearly empty (low pressure). Water flows from left to right.">
+          <rect x="24" y="30" width="120" height="150" rx="16" fill="#fff" stroke="#3d1a47" stroke-width="5"/>
+          <rect x="29" y="62" width="110" height="113" rx="11" fill="#ff9fcd"/>
+          <rect x="376" y="30" width="120" height="150" rx="16" fill="#fff" stroke="#3d1a47" stroke-width="5"/>
+          <rect x="381" y="138" width="110" height="37" rx="11" fill="#ff9fcd"/>
+          <rect x="144" y="142" width="232" height="22" fill="#d6b8ff" stroke="#3d1a47" stroke-width="5"/>
+          <path class="pipe-arrow" d="M170 153H340m-18 -12l18 12l-18 12" fill="none" stroke="#3d1a47" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="84" y="22" text-anchor="middle" class="svg-label">High pressure</text>
+          <text x="84" y="124" text-anchor="middle" class="svg-label big">9 V</text>
+          <text x="436" y="22" text-anchor="middle" class="svg-label">Low pressure</text>
+          <text x="436" y="124" text-anchor="middle" class="svg-label big">0 V</text>
+          <text x="260" y="198" text-anchor="middle" class="svg-label">Water flows = current flows 🌊</text>
+        </svg>
+        <div>
+          <h3>The water-pipe analogy</h3>
+          <ul class="cute-list">
+            <li><strong>Voltage</strong> = water pressure (how hard it pushes)</li>
+            <li><strong>Current</strong> = how much water flows per second</li>
+            <li><strong>Voltage is always a difference.</strong> It's measured <em>between</em> two points, like "9 V higher than ground".</li>
+            <li><strong>Ground (0 V)</strong> = the floor we measure everything from. 🧹</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="center">Meet the three main characters</h3>
+      <div class="grid3">
+        <article class="card character-card">
+          <div class="bubble small">I slow things down!</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Rita the Resistor"><use href="#rita"/></svg>
+          <h4>Rita the Resistor</h4>
+          <p>A narrow pipe. She makes it harder for current to flow and "uses up" some voltage while doing it.</p>
+          <p class="formula">V = I × R</p>
+        </article>
+        <article class="card character-card">
+          <div class="bubble small">I hold the charge! 💖</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Cappy the Capacitor"><use href="#cappy"/></svg>
+          <h4>Cappy the Capacitor</h4>
+          <p>A little water tank. He stores charge, and his voltage tells you how full he is. He hates sudden voltage changes.</p>
+          <p class="formula">Q = C × V</p>
+        </article>
+        <article class="card character-card">
+          <div class="bubble small">Don't rush me! 🌀</div>
+          <svg class="char" viewBox="0 0 120 130" role="img" aria-label="Indy the Inductor"><use href="#indy"/></svg>
+          <h4>Indy the Inductor</h4>
+          <p>A heavy paddle wheel in the pipe. Once the water is moving, he keeps it moving. He hates sudden <em>current</em> changes.</p>
+          <p class="formula">V = L × dI/dt</p>
+        </article>
+      </div>
+    </section>
+
+    <div class="wave" role="presentation"></div>
+
+    <!-- 3. RC CIRCUIT -->
+    <section id="rc" class="section">
+      <h2><span class="emoji">🔋</span> The RC Circuit</h2>
+      <p class="lead">Rita and Cappy hold hands in a loop with a battery. Cappy fills up... but only as fast as Rita lets him.</p>
+
+      <div class="card two-col">
+        <div>
+          <svg class="diagram" id="rcDiagram" viewBox="0 0 520 300" role="img" aria-label="RC circuit diagram: battery, resistor and capacitor in series. Point A is the battery plus, point B is between the resistor and capacitor, point C is ground.">
+            <!-- wires -->
+            <path class="dw" d="M70 110V50H150M250 50H330V120M330 140V250H70V130"/>
+            <!-- animated current dots (speed/visibility set from JS) -->
+            <path class="flow" id="rcFlow" d="M70 110V50H150M250 50H330V120M330 140V250H70V130"/>
+            <!-- battery -->
+            <path class="dw" d="M50 110H90"/>
+            <path class="dw" d="M60 130H80" stroke-width="9"/>
+            <text x="100" y="116" class="svg-label">+</text>
+            <text x="100" y="142" class="svg-label">−</text>
+            <text x="84" y="196" class="svg-label">Battery</text>
+            <text x="84" y="216" class="svg-label" id="rcDiagVs">Vs = 9 V</text>
+            <!-- resistor -->
+            <path class="dw" d="M150 50l10 -18l20 36l20 -36l20 36l20 -36l10 18"/>
+            <text x="200" y="100" text-anchor="middle" class="svg-label">Rita (R)</text>
+            <!-- capacitor -->
+            <path class="dw" d="M300 120H360M300 140H360"/>
+            <text x="372" y="136" class="svg-label">Cappy (C)</text>
+            <!-- ground -->
+            <path class="dw" d="M200 250V264M184 264H216M190 272H210M196 280H204"/>
+            <!-- point badges + live voltages -->
+            <g class="pt"><circle cx="70" cy="50" r="15"/><text x="70" y="56" text-anchor="middle">A</text></g>
+            <g class="pt"><circle cx="330" cy="50" r="15"/><text x="330" y="56" text-anchor="middle">B</text></g>
+            <g class="pt"><circle cx="200" cy="250" r="15"/><text x="200" y="256" text-anchor="middle">C</text></g>
+            <text x="70" y="22" text-anchor="middle" class="volt" id="rcVA">9.00 V</text>
+            <text x="330" y="22" text-anchor="middle" class="volt" id="rcVB">0.00 V</text>
+            <text x="226" y="284" class="volt" id="rcVC">0 V (ground)</text>
+          </svg>
+          <p class="caption"><strong>A</strong> = battery + &nbsp;•&nbsp; <strong>B</strong> = between Rita and Cappy &nbsp;•&nbsp; <strong>C</strong> = ground</p>
+        </div>
+
+        <div>
+          <h3>The tank &amp; the narrow pipe 🚰</h3>
+          <p>Cappy is a <strong>water tank</strong>. The battery pushes water in through Rita, a <strong>narrow pipe</strong>.</p>
+          <p>At first the tank is empty, so there's a big pressure difference and water rushes in. As it fills, the pressure difference shrinks and the flow slows down. That's why it never fills at a steady speed. 🐢</p>
+          <p>The two always share the battery's voltage: <span class="inline-formula">Vs = Vr + Vc</span></p>
+          <div class="formula-box">
+            <p class="formula">τ = R × C</p>
+            <p class="formula">Vc = Vs × (1 − e<sup>−t/RC</sup>)</p>
+            <p class="formula">Vr = Vs × e<sup>−t/RC</sup></p>
+          </div>
+          <p class="tiny">τ is "tau", the circuit's time constant. Big R or big C = a slower circuit.</p>
+        </div>
+      </div>
+
+      <div class="card demo">
+        <h3>🎛️ Play with it!</h3>
+        <div class="demo-grid">
+          <div class="controls">
+            <label class="slider">
+              <span>Resistor R <output id="rcROut">1 kΩ</output></span>
+              <input type="range" id="rcR" min="100" max="10000" step="100" value="1000">
+            </label>
+            <label class="slider">
+              <span>Capacitor C <output id="rcCOut">100 µF</output></span>
+              <input type="range" id="rcC" min="10" max="1000" step="10" value="100">
+            </label>
+            <label class="slider">
+              <span>Source voltage Vs <output id="rcVsOut">9 V</output></span>
+              <input type="range" id="rcVs" min="1" max="12" step="0.5" value="9">
+            </label>
+            <div class="btn-row">
+              <button class="btn" id="rcCharge" type="button">⚡ Charge</button>
+              <button class="btn alt" id="rcDischarge" type="button">🔌 Discharge</button>
+            </div>
+            <p class="tiny">Charge connects the battery to A. Discharge swaps the battery for a plain wire to ground, so A drops to 0 V and Cappy empties through Rita (her voltage goes negative because the current flips direction!).</p>
+          </div>
+
+          <div class="graph-col">
+            <div class="legend">
+              <span><i style="--c:#ff2d95"></i> A (battery +)</span>
+              <span><i style="--c:#7b3fe4"></i> B = Vc (across capacitor)</span>
+              <span><i style="--c:#00a6a6"></i> Vr (across resistor, A − B)</span>
+            </div>
+            <div class="graph-card"><canvas id="rcCanvas" role="img" aria-label="Live graph of voltage over time at point A, point B and across the resistor"></canvas></div>
+            <p class="tiny center">The faint dashed lines show where each voltage is heading; the thick lines are drawn live. Point C is ground, always 0 V.</p>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="readout purple"><span>Vc (at B)</span><b id="rcVcNum">0.00 V</b></div>
+          <div class="readout teal"><span>Vr (across R)</span><b id="rcVrNum">9.00 V</b></div>
+          <div class="readout pink"><span>τ = R × C</span><b id="rcTauNum">100 ms</b></div>
+          <div class="readout yellow"><span>Time / charge</span><b id="rcProgNum">0.00 τ · 0%</b></div>
+        </div>
+        <div class="math-check" aria-live="off">
+          <p id="rcCheck1" class="formula"></p>
+          <p id="rcCheck2" class="formula"></p>
+        </div>
+      </div>
+
+      <aside class="rule">
+        <h4>📏 Rule of thumb</h4>
+        <ul class="cute-list">
+          <li>After <strong>1 τ</strong> Cappy is about <strong>63%</strong> full.</li>
+          <li>After <strong>2 τ</strong> ≈ 86%, after <strong>3 τ</strong> ≈ 95%.</li>
+          <li>After <strong>5 τ</strong> he's <strong>basically full</strong> (99.3%). 🎉</li>
+          <li>Discharging works backwards: after 1 τ he's still holding about 37%.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <div class="wave" role="presentation"></div>
+
+    <!-- 4. LC CIRCUIT -->
+    <section id="lc" class="section">
+      <h2><span class="emoji">🎢</span> The LC Circuit</h2>
+      <p class="lead">Cappy starts out full. Indy is calm. Then things get bouncy!</p>
+
+      <div class="card two-col">
+        <div>
+          <svg class="diagram" viewBox="0 0 520 290" role="img" aria-label="LC circuit diagram: a capacitor and an inductor connected in a loop. Point A is the top wire, point C is the bottom wire (ground).">
+            <path class="dw" d="M150 40H370V90M370 190V240H150V140M150 40V120"/>
+            <!-- capacitor -->
+            <path class="dw" d="M118 120H182M118 140H182"/>
+            <text x="14" y="138" class="svg-label">Cappy (C)</text>
+            <!-- inductor coil -->
+            <path class="dw" d="M370 90c30 0 30 20 0 20c30 0 30 20 0 20c30 0 30 20 0 20c30 0 30 20 0 20c30 0 30 20 0 20"/>
+            <text x="410" y="146" class="svg-label">Indy (L)</text>
+            <!-- ground -->
+            <path class="dw" d="M260 240V254M244 254H276M250 262H270M256 270H264"/>
+            <!-- points -->
+            <g class="pt"><circle cx="260" cy="40" r="15"/><text x="260" y="46" text-anchor="middle">A</text></g>
+            <g class="pt"><circle cx="260" cy="240" r="15"/><text x="260" y="246" text-anchor="middle">C</text></g>
+            <text x="260" y="14" text-anchor="middle" class="volt" id="lcVA">5.00 V</text>
+            <text x="286" y="274" class="volt">0 V (ground)</text>
+          </svg>
+          <p class="caption"><strong>A</strong> = top wire (the voltage on both parts) &nbsp;•&nbsp; <strong>C</strong> = ground</p>
+        </div>
+
+        <div>
+          <h3>Energy on a swing 🛝</h3>
+          <p>Think of a child on a swing. At the top of the swing she's momentarily still, but full of <em>stored height</em>. At the bottom she zooms along, full of <em>motion</em>.</p>
+          <p>Cappy stores energy in an <strong>electric field</strong> (like the height). Indy stores it in a <strong>magnetic field</strong> (like the motion). The energy slooooshes back and forth between them, over and over.</p>
+          <p>Real wires have a little resistance, so the swing slowly runs out of steam. That's <strong>damping</strong>. 🍃</p>
+          <div class="formula-box">
+            <p class="formula">f = 1 / (2π × √(L × C))</p>
+          </div>
+          <p class="tiny">Bigger L or C = a lazier swing (lower frequency).</p>
+        </div>
+      </div>
+
+      <div class="card demo">
+        <h3>🎛️ Make it swing!</h3>
+        <div class="demo-grid">
+          <div class="controls">
+            <label class="slider">
+              <span>Inductor L <output id="lcLOut">50 mH</output></span>
+              <input type="range" id="lcL" min="10" max="100" step="1" value="50">
+            </label>
+            <label class="slider">
+              <span>Capacitor C <output id="lcCOut">20 µF</output></span>
+              <input type="range" id="lcC" min="10" max="100" step="1" value="20">
+            </label>
+            <label class="slider">
+              <span>Damping <output id="lcDOut">10 · gentle</output></span>
+              <input type="range" id="lcD" min="0" max="100" step="1" value="10">
+            </label>
+            <div class="btn-row">
+              <button class="btn" id="lcPluck" type="button">🎵 Pluck again</button>
+            </div>
+            <p class="tiny">Set damping to 0 for a swing that never stops. Crank it up and it fades fast.</p>
+          </div>
+
+          <div class="graph-col">
+            <div class="legend">
+              <span><i style="--c:#ff2d95"></i> Capacitor voltage (Vc)</span>
+              <span><i style="--c:#00a6a6"></i> Inductor voltage (VL)</span>
+            </div>
+            <div class="graph-card"><canvas id="lcCanvas" role="img" aria-label="Animated graph of the capacitor voltage and the inductor voltage over time"></canvas></div>
+            <div class="energy" aria-hidden="true">
+              <div><span>Cappy's electric energy</span><div class="bar"><i id="lcEc" class="pink-fill"></i></div></div>
+              <div><span>Indy's magnetic energy</span><div class="bar"><i id="lcEl" class="teal-fill"></i></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="readouts">
+          <div class="readout pink"><span>Frequency f</span><b id="lcFNum">159.2 Hz</b></div>
+          <div class="readout purple"><span>Period T = 1/f</span><b id="lcTNum">6.28 ms</b></div>
+          <div class="readout teal"><span>Actually ringing at</span><b id="lcFdNum">158.4 Hz</b></div>
+          <div class="readout yellow"><span>Vc right now</span><b id="lcVcNum">5.00 V</b></div>
+        </div>
+        <div class="math-check">
+          <p id="lcCheck" class="formula"></p>
+        </div>
+        <p class="tiny center">Why mirror images? Walking once around the loop, the voltage "drops" must add up to zero (that's Kirchhoff's voltage law 🕵️). So Indy's voltage mirrors Cappy's. With damping, the sneaky resistance takes a small share too.</p>
+      </div>
+    </section>
+
+    <div class="wave" role="presentation"></div>
+
+    <!-- 5. CHEAT SHEET -->
+    <section id="cheat" class="section">
+      <h2><span class="emoji">📋</span> RC vs LC cheat sheet</h2>
+      <div class="card table-card">
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col"></th><th scope="col">🔋 RC circuit</th><th scope="col">🎢 LC circuit</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">Behavior</th><td>Voltage creeps smoothly up (or down) and settles. No bouncing.</td><td>Voltage swings back and forth, like a swing or a bouncy spring.</td></tr>
+              <tr><th scope="row">Energy lives in</th><td>The capacitor (and Rita turns some into heat 🔥)</td><td>Swaps between capacitor and inductor</td></tr>
+              <tr><th scope="row">Used for</th><td>Filters, timers, debouncing buttons, smoothing signals</td><td>Radio tuners, oscillators, wireless chargers</td></tr>
+              <tr><th scope="row">Main formula</th><td class="formula">τ = R × C</td><td class="formula">f = 1 / (2π√(LC))</td></tr>
+              <tr><th scope="row">Speed knob</th><td>Bigger R or C = slower</td><td>Bigger L or C = lower frequency</td></tr>
+              <tr><th scope="row">Mood</th><td>Calm and chill 🧘</td><td>Bouncy and excitable 🤸</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <div class="wave" role="presentation"></div>
+
+    <!-- 6. QUIZ -->
+    <section id="quiz" class="section">
+      <h2><span class="emoji">🎉</span> Mini quiz</h2>
+      <p class="lead">Three questions. No pressure. Sparkles for right answers! ✨</p>
+      <div id="quizBox" class="card quiz"></div>
+    </section>
+  </main>
+
+  <!-- 7. FOOTER -->
+  <footer class="footer">
+    <p class="joke">🔧 "Why did the capacitor break up with the resistor? Because every time they got close, she held a charge against him!" 💔⚡</p>
+    <p class="made">Made with VS Code + GitHub Copilot 💖</p>
+  </footer>
+
+  <div id="confetti" aria-hidden="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
